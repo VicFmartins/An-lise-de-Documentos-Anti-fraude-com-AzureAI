@@ -1,0 +1,17 @@
+{
+  "document_type": "identity",
+  "extracted_text": "Documento oficial de identificacao do titular.",
+  "fields": {
+    "full_name": "Maria Souza",
+    "document_number": "RG1234567",
+    "birth_date": "1993-04-11",
+    "cpf": "529.982.247-25"
+  },
+  "ocr_confidence": 0.96,
+  "metadata": {
+    "filename": "rg-frente.png",
+    "page_count": 2,
+    "edited_after_scan": false,
+    "previous_submissions": 0
+  }
+}

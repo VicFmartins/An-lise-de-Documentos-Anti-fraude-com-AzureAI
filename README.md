@@ -1,95 +1,141 @@
-A análise de documentos anti-fraude utilizando Azure AI envolve a utilização de serviços de inteligência artificial para detectar, analisar e prevenir fraudes em documentos diversos, como identidades, comprovantes de renda e documentos financeiros. Abaixo está um guia passo a passo para implementar uma solução de análise de documentos anti-fraude com Azure AI:
+# Analise de Documentos Anti-fraude com Azure AI
 
-Passo 1: Criar uma Conta do Azure
-Acesse o Portal do Azure:
+Este repositorio deixou de ser apenas um guia textual e virou um MVP executavel para triagem anti-fraude de documentos. A solucao combina uma API em FastAPI, normalizacao de resultados do Azure AI Document Intelligence e um motor de heuristicas para gerar score de risco, sinais explicaveis e recomendacao operacional.
 
-Vá para portal.azure.com e faça login ou crie uma nova conta.
-Criar um Novo Recurso:
+## O que o projeto entrega
 
-Clique em "Criar um recurso" e selecione "Cognitive Services".
-Configurar o Serviço:
+- API REST para analise de documentos
+- entrada direta com texto extraido e campos estruturados
+- endpoint dedicado para normalizar saida do Azure AI Document Intelligence
+- score de risco com sinais explicaveis
+- exemplos de payloads limpo, suspeito e vindo do Azure
+- testes automatizados
+- Dockerfile para execucao local
 
-Escolha o tipo de serviço apropriado, como "Form Recognizer" para extração de dados de documentos ou "Computer Vision" para análise de imagens.
-Preencha os detalhes, como nome do recurso, grupo de recursos e região.
-Revisar e Criar:
+## Arquitetura do MVP
 
-Revise as configurações e clique em "Criar".
-Passo 2: Obter Credenciais do Serviço
-Acesse as Chaves e o Endpoint:
-Após a criação do recurso, navegue até a seção "Chaves e Endpoint".
-Anote a chave da API e o endpoint, pois você precisará delas para fazer chamadas ao serviço.
-Passo 3: Preparar o Ambiente de Desenvolvimento
-Configurar o Ambiente:
+```mermaid
+flowchart LR
+    A["Documento / OCR / Azure AI"] --> B["Normalizacao"]
+    B --> C["Motor de Heuristicas"]
+    C --> D["Score de Risco"]
+    C --> E["Sinais Explicaveis"]
+    D --> F["Acao Operacional"]
+    E --> F
+```
 
-Selecione uma linguagem de programação (como Python ou C#) e instale as bibliotecas necessárias.
-Para Python, você pode precisar de requests ou bibliotecas específicas do Azure.
-Instalar Bibliotecas:
+## Endpoints
 
-Se estiver usando Python, instale as bibliotecas necessárias:
-bash
-Copiar código
-pip install azure-ai-formrecognizer
-Passo 4: Implementar a Análise de Documentos
-Implementar a Análise com Form Recognizer:
+### `GET /health`
 
-Crie um script para enviar documentos ao Form Recognizer para análise. Veja um exemplo em Python:
-python
-Copiar código
-from azure.ai.formrecognizer import DocumentAnalysisClient
-from azure.core.credentials import AzureKeyCredential
+Retorna o status do servico.
 
-# Substitua pelos valores correspondentes
-endpoint = "SEU_ENDPOINT"
-api_key = "SUA_CHAVE_DE_API"
+### `POST /api/documents/analyze`
 
-# Inicializar o cliente
-client = DocumentAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(api_key))
+Recebe um payload ja estruturado com texto, campos e metadados.
 
-# Função para analisar documento
-def analisar_documento(url):
-    poller = client.begin_analyze_document_from_url("prebuilt-document", url)
-    result = poller.result()
+### `POST /api/documents/analyze-azure-result`
 
-    # Exibir resultados
-    for page in result.pages:
-        for line in page.lines:
-            print("Texto:", line.content)
+Recebe um resultado bruto do Azure AI Document Intelligence e converte para o formato interno antes da analise.
 
-# Exemplo de uso
-url_do_documento = "URL_DO_DOCUMENTO_A_SER_ANALISADO"
-analisar_documento(url_do_documento)
-Analisar Documentos de Identidade:
+## Exemplo de uso
 
-Utilize modelos pré-treinados específicos para documentos de identidade (como carteiras de identidade e passaportes) que o Azure oferece.
-Passo 5: Implementar Detecção de Fraudes
-Análise de Dados Extraídos:
+```json
+{
+  "document_type": "invoice",
+  "extracted_text": "FATURA SAMPLE photoshop rascunho para teste interno",
+  "fields": {
+    "issuer_name": "Empresa Ficticia",
+    "invoice_number": "NF-2025-009",
+    "issue_date": "2030-01-15",
+    "total_amount": "1000,00",
+    "subtotal": "800,00",
+    "fees": "50,00",
+    "discount": "0,00",
+    "cnpj": "11.111.111/1111-11"
+  },
+  "ocr_confidence": 0.69,
+  "metadata": {
+    "edited_after_scan": true,
+    "previous_submissions": 3,
+    "page_count": 1
+  }
+}
+```
 
-Após a extração dos dados, implemente lógica para verificar inconsistências ou padrões de fraude. Isso pode incluir:
-Verificar se o nome na identidade corresponde ao nome no comprovante de renda.
-Validar formatos de número de documento.
-Machine Learning:
+## Como executar localmente
 
-Considere usar Azure Machine Learning para treinar modelos que podem prever fraudes com base em dados históricos.
-Passo 6: Armazenar e Monitorar Resultados
-Armazenar Resultados:
+### Com Python
 
-Armazene os resultados da análise em um banco de dados (como Azure SQL Database ou Cosmos DB) para referência futura.
-Monitorar Atividades:
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-Implemente um sistema de monitoramento para detectar atividades suspeitas em tempo real.
-Passo 7: Testar e Refinar
-Testar o Sistema:
+### Com Docker
 
-Teste a aplicação com documentos reais ou simulados para verificar a eficácia da detecção de fraudes.
-Refinar o Modelo:
+```bash
+docker build -t azureai-antifraude .
+docker run -p 8000:8000 azureai-antifraude
+```
 
-Utilize feedback para ajustar os parâmetros do modelo ou melhorar a lógica de análise.
-Passo 8: Segurança e Conformidade
-Implementar Medidas de Segurança:
+## Estrutura do projeto
 
-Certifique-se de que todos os dados sensíveis sejam criptografados e que as permissões de acesso sejam controladas.
-Conformidade com Normas:
+- `app/main.py`: endpoints da API
+- `app/azure_normalizer.py`: normaliza resultados do Azure AI Document Intelligence
+- `app/analyzer.py`: regras de risco e score
+- `app/validators.py`: validadores de CPF e CNPJ
+- `tests/test_analyzer.py`: testes do fluxo principal
+- `docs/heuristics.md`: explicacao das heuristicas
+- `examples`: payloads prontos para teste
 
-Esteja ciente das normas e regulamentações locais sobre a manipulação de dados pessoais e privacidade, como a LGPD ou GDPR.
-Conclusão
-Esse guia fornece um caminho claro para implementar uma solução de análise de documentos anti-fraude utilizando Azure AI. A tecnologia de IA do Azure, combinada com a lógica de negócios adequada, pode ajudar a detectar e prevenir fraudes de maneira eficaz, melhorando a segurança e a confiabilidade em processos que envolvem documentos sensíveis.
+## Heuristicas aplicadas
+
+- campos obrigatorios ausentes por tipo de documento
+- baixa confianca de OCR
+- reutilizacao excessiva do mesmo arquivo
+- metadado de edicao apos o scan
+- palavras suspeitas no texto
+- CPF ou CNPJ invalidos
+- datas futuras ou expiradas
+- inconsistencias de total financeiro
+
+## Azure AI no fluxo
+
+O projeto foi estruturado para receber a saida do Azure AI Document Intelligence e transformar esse resultado em uma triagem antifraude explicavel. Em termos praticos:
+
+- o Azure extrai texto e campos
+- a API normaliza o payload
+- o motor local de regras calcula o risco
+- o time ganha uma decisao mais auditavel
+
+Isso evita depender apenas de um modelo opaco e facilita revisao humana, tuning de regras e demonstracao de valor de negocio.
+
+## Referencias oficiais
+
+Usei como base as documentacoes oficiais da Microsoft para alinhar o posicionamento do projeto e o nome atual do servico:
+
+- [Azure AI Document Intelligence code samples](https://learn.microsoft.com/en-us/samples/azure-samples/document-intelligence-code-samples/document-intelligence-code-samples/)
+- [Azure AI Document Intelligence samples repository](https://github.com/Azure-Samples/document-intelligence-code-samples)
+
+Observacao: a propria Microsoft destaca que o antigo Form Recognizer foi renomeado para Azure AI Document Intelligence em julho de 2023.
+
+## Validacao
+
+```bash
+pytest
+```
+
+Os testes cobrem:
+
+- documento limpo com risco baixo
+- fatura suspeita com risco alto ou critico
+- normalizacao de payload do Azure AI Document Intelligence
+
+## Proximos passos
+
+- adicionar persistencia de casos analisados
+- incluir versionamento de regras
+- integrar filas e processamento assincrono
+- conectar com Azure Blob Storage
+- adicionar observabilidade e trilha de auditoria

@@ -1,0 +1,38 @@
+{
+  "document_type": "invoice",
+  "metadata": {
+    "filename": "invoice.pdf",
+    "page_count": 1
+  },
+  "azure_result": {
+    "content": "Invoice sample generated for review",
+    "documents": [
+      {
+        "fields": {
+          "issuer_name": {
+            "content": "ACME LTDA",
+            "confidence": 0.98
+          },
+          "invoice_number": {
+            "content": "FAT-0099",
+            "confidence": 0.97
+          },
+          "issue_date": {
+            "valueDate": "2025-03-01",
+            "confidence": 0.96
+          },
+          "total_amount": {
+            "valueCurrency": {
+              "amount": 1500.0
+            },
+            "confidence": 0.95
+          },
+          "cnpj": {
+            "content": "45.723.174/0001-10",
+            "confidence": 0.94
+          }
+        }
+      }
+    ]
+  }
+}

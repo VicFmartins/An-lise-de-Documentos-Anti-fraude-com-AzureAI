@@ -1,0 +1,20 @@
+{
+  "document_type": "invoice",
+  "extracted_text": "FATURA SAMPLE photoshop rascunho para teste interno",
+  "fields": {
+    "issuer_name": "Empresa Ficticia",
+    "invoice_number": "NF-2025-009",
+    "issue_date": "2030-01-15",
+    "total_amount": "1000,00",
+    "subtotal": "800,00",
+    "fees": "50,00",
+    "discount": "0,00",
+    "cnpj": "11.111.111/1111-11"
+  },
+  "ocr_confidence": 0.69,
+  "metadata": {
+    "edited_after_scan": true,
+    "previous_submissions": 3,
+    "page_count": 1
+  }
+}
