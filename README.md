@@ -1,6 +1,6 @@
 # Analise de Documentos Anti-fraude com Azure AI
 
-Este repositorio deixou de ser apenas um guia textual e virou um MVP executavel para triagem anti-fraude de documentos. A solucao combina uma API em FastAPI, normalizacao de resultados do Azure AI Document Intelligence e um motor de heuristicas para gerar score de risco, sinais explicaveis e recomendacao operacional.
+A solucao combina uma API em FastAPI, normalizacao de resultados do Azure AI Document Intelligence e um motor de heuristicas para gerar score de risco, sinais explicaveis e recomendacao operacional.
 
 ## O que o projeto entrega
 
